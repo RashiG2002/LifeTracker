@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports - LifeTracker</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .recommendation-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .recommendation-item {
+            background-color: var(--card-bg);
+            border-left: 4px solid var(--primary-color);
+            padding: 15px 20px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: flex-start;
+        }
+        .recommendation-item i {
+            color: var(--primary-color);
+            margin-right: 15px;
+            margin-top: 3px;
+            font-size: 1.2rem;
+        }
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .filter-tab {
+            padding: 8px 16px;
+            background-color: var(--hover-color);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .filter-tab.active {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body class="bg-reports">
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><div class="logo-badge">LT</div> LifeTracker</h1>
+                <span th:text="'Welcome, ' + ${session.userName}" style="font-weight: 500; font-size: 0.9rem; margin-top: 5px; display: block; color: var(--text-secondary);">Welcome, User</span>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a th:href="@{/dashboard}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a th:href="@{/transactions}"><i class="fas fa-exchange-alt"></i> <span>Transactions</span></a></li>
+                <li><a th:href="@{/budgets}"><i class="fas fa-wallet"></i> <span>Budgets</span></a></li>
+                <li><a th:href="@{/tasks}"><i class="fas fa-tasks"></i> <span>Tasks</span></a></li>
+                <li><a th:href="@{/health}"><i class="fas fa-heartbeat"></i> <span>Health</span></a></li>
+                <li><a th:href="@{/skills}"><i class="fas fa-graduation-cap"></i> <span>Skills</span></a></li>
+                <li><a th:href="@{/reports}" class="active"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 40px; border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 40px;">
+                <div>
+                    <h1 style="color: var(--primary-color); font-size: 2.5rem; font-weight: 800; margin-bottom: 5px;">Analysis Reports</h1>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; margin: 0;">View insights, visual analytics, and personalized recommendations.</p>
+                </div>
+                <img th:src="@{/images/reports_deco_1773913905823.png}" alt="Decoration" style="height: 120px; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.1)); border-radius: 16px; mix-blend-mode: multiply;">
+            </div>
+            
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="updateCharts('all')">All Time</button>
+                <button class="filter-tab" onclick="updateCharts('daily')">Daily</button>
+                <button class="filter-tab" onclick="updateCharts('weekly')">Weekly</button>
+                <button class="filter-tab" onclick="updateCharts('monthly')">Monthly</button>
+            </div>
+
+            <!-- Personalized Recommendations -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-lightbulb"></i> Personalized Recommendations</h2>
+                </div>
+                <div class="card-body">
+                    <ul class="recommendation-list" th:if="${recommendations != null and !recommendations.isEmpty()}">
+                        <li class="recommendation-item" th:each="rec : ${recommendations}">
+                            <i class="fas fa-info-circle"></i>
+                            <span th:text="${rec}">Recommendation text</span>
+                        </li>
+                    </ul>
+                    <div th:if="${recommendations == null or recommendations.isEmpty()}" class="empty-state">
+                        <p>Keep using LifeTracker to get personalized recommendations here.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid">
+                <!-- Financial Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-line"></i> Financial Summary</h2>
+                    </div>
+                    <div class="stats-grid" style="margin: 0;">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>Total Income</h3>
+                                <p th:text="'Rs. ' + ${#numbers.formatDecimal(totalIncome, 1, 2)}" class="text-success">Rs. 0.00</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>Total Expenses</h3>
+                                <p th:text="'Rs. ' + ${#numbers.formatDecimal(totalExpenses, 1, 2)}" class="text-danger">Rs. 0.00</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>Net Savings</h3>
+                                <p th:text="'Rs. ' + ${#numbers.formatDecimal(totalIncome - totalExpenses, 1, 2)}">Rs. 0.00</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-pie"></i> Expenses by Category</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="expensesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="dashboard-grid" style="margin-top: 20px;">
+                <!-- Health Summary -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-heartbeat"></i> Health Insights</h2>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="activitiesChart"></canvas>
+                    </div>
+                </div>
+                
+                <!-- Task Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-tasks"></i> Task Performance</h2>
+                    </div>
+                    <div class="stats-grid" style="margin: 0;">
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>Pending Tasks</h3>
+                                <p th:text="${taskStats != null ? taskStats['PENDING'] : 0}">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>In Progress</h3>
+                                <p th:text="${taskStats != null ? taskStats['IN_PROGRESS'] : 0}">0</p>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-info">
+                                <h3>Completed</h3>
+                                <p th:text="${taskStats != null ? taskStats['COMPLETED'] : 0}">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let expensesChartInstance = null;
+        let activitiesChartInstance = null;
+
+        const chartColors = [
+            'rgba(54, 162, 235, 0.8)',
+            'rgba(255, 99, 132, 0.8)',
+            'rgba(255, 206, 86, 0.8)',
+            'rgba(75, 192, 192, 0.8)',
+            'rgba(153, 102, 255, 0.8)',
+            'rgba(255, 159, 64, 0.8)'
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateCharts('all');
+        });
+
+        function updateCharts(period) {
+            // Update active state on tabs
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Fetch and render Expenses chart
+            fetch(`/api/reports/expenses-pie?period=${period}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(expensesChartInstance) expensesChartInstance.destroy();
+                    
+                    const ctx = document.getElementById('expensesChart').getContext('2d');
+                    expensesChartInstance = new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: data.label,
+                                data: data.data,
+                                backgroundColor: chartColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                })
+                .catch(err => console.error("Error fetching expenses data:", err));
+
+            // Fetch and render Activities chart
+            fetch(`/api/reports/activity-pie?period=${period}`)
+                .then(res => res.json())
+                .then(data => {
+                    if(activitiesChartInstance) activitiesChartInstance.destroy();
+                    
+                    const ctx = document.getElementById('activitiesChart').getContext('2d');
+                    activitiesChartInstance = new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: data.label,
+                                data: data.data,
+                                backgroundColor: chartColors,
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false
+                        }
+                    });
+                })
+                .catch(err => console.error("Error fetching activity data:", err));
+        }
+    </script>
+</body>
+</html>
+

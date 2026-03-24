@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time & Task Management - LifeTracker</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-tasks">
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><div class="logo-badge">LT</div> LifeTracker</h1>
+                <span th:text="'Welcome, ' + ${session.userName}" style="font-weight: 500; font-size: 0.9rem; margin-top: 5px; display: block; color: var(--text-secondary);">Welcome, User</span>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a th:href="@{/dashboard}"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a th:href="@{/transactions}"><i class="fas fa-exchange-alt"></i> <span>Transactions</span></a></li>
+                <li><a th:href="@{/budgets}"><i class="fas fa-wallet"></i> <span>Budgets</span></a></li>
+                <li><a th:href="@{/tasks}" class="active"><i class="fas fa-clock"></i> <span>Time Management</span></a></li>
+                <li><a th:href="@{/health}"><i class="fas fa-heartbeat"></i> <span>Health</span></a></li>
+                <li><a th:href="@{/skills}"><i class="fas fa-graduation-cap"></i> <span>Skills</span></a></li>
+                <li><a th:href="@{/reports}"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 40px; border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 40px;">
+                <div>
+                    <h1 style="color: var(--primary-color); font-size: 2.5rem; font-weight: 800; margin-bottom: 5px;">Time Management</h1>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; margin: 0;">Plan tasks, manage schedules, and improve productivity through organized tracking.</p>
+                </div>
+                <img th:src="@{/images/tasks_deco_1773914709742.png}" alt="Decoration" style="height: 120px; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.1)); border-radius: 16px; mix-blend-mode: multiply;">
+            </div>
+            
+            <!-- Flash Messages -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            
+            <!-- Time Management Hub -->
+            <div class="tm-dashboard card">
+                <div class="tm-tabs">
+                    <div class="tm-tab active"><i class="fas fa-tasks"></i> Tasks</div>
+                    <div class="tm-tab"><i class="fas fa-calendar-alt"></i> Calendar</div>
+                    <div class="tm-tab"><i class="fas fa-stopwatch"></i> Timer</div>
+                    <div class="tm-tab"><i class="fas fa-cloud-sun"></i> Weather</div>
+                    <div class="tm-tab"><i class="fas fa-newspaper"></i> News</div>
+                </div>
+
+                <div class="tm-content">
+                    <div class="hub-card-title mb-4">Task Management<br><span style="font-size: 0.9rem; font-weight: normal; opacity: 0.7;">Organize your tasks and track your progress</span></div>
+                    
+                    <div class="tm-stats">
+                        <div class="tm-stat-box">
+                            <i class="fas fa-bullseye" style="position: absolute; right: 20px; top: 20px; font-size: 1.5rem; color: #10b981;"></i>
+                            <div class="tm-label">Total Tasks</div>
+                            <div class="tm-val" th:text="${tasks != null} ? ${#lists.size(tasks)} : 0">0</div>
+                            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.6;">This week</div>
+                        </div>
+
+                        <div class="tm-stat-box highlight">
+                            <i class="fas fa-check-circle" style="position: absolute; right: 20px; top: 20px; font-size: 1.5rem; color: rgba(255,255,255,0.8);"></i>
+                            <div class="tm-label">Completed</div>
+                            <div class="tm-val" th:text="${tasks != null} ? ${#lists.size(tasks.?[status.name() == 'COMPLETED'])} : 0">0</div>
+                            <div style="font-size: 0.8rem; margin-top: 5px; color: rgba(255,255,255,0.8);">Tasks done</div>
+                        </div>
+
+                        <div class="tm-stat-box">
+                            <i class="fas fa-arrow-trend-up" style="position: absolute; right: 20px; top: 20px; font-size: 1.5rem; color: #3b82f6;"></i>
+                            <div class="tm-label">Completion Rate</div>
+                            <div class="tm-val">
+                                <span th:if="${tasks != null && #lists.size(tasks) > 0}" th:text="${(#lists.size(tasks.?[status.name() == 'COMPLETED']) * 100 / #lists.size(tasks))} + '%'">0%</span>
+                                <span th:unless="${tasks != null && #lists.size(tasks) > 0}">0%</span>
+                            </div>
+                            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.6;">Success rate</div>
+                        </div>
+
+                        <div class="tm-stat-box" style="border: 1px solid rgba(239, 68, 68, 0.2);">
+                            <i class="fas fa-exclamation-circle" style="position: absolute; right: 20px; top: 20px; font-size: 1.5rem; color: #ef4444;"></i>
+                            <div class="tm-label">High Priority</div>
+                            <div class="tm-val">
+                                <span th:text="${tasks != null} ? ${#lists.size(tasks.?[priority.name() == 'HIGH' && status.name() == 'COMPLETED'])} : 0">0</span>
+                                <span style="font-size: 1.2rem; opacity: 0.5;">/</span>
+                                <span style="font-size: 1.2rem;" th:text="${tasks != null} ? ${#lists.size(tasks.?[priority.name() == 'HIGH'])} : 0">0</span>
+                            </div>
+                            <div style="font-size: 0.8rem; margin-top: 5px; opacity: 0.6;">Completed</div>
+                        </div>
+                    </div>
+
+                    <div class="weekly-calendar">
+                        <div class="week-header">
+                            <div style="font-weight: 700; font-size: 1.2rem;">Weekly Calendar<br><span style="font-size: 0.8rem; font-weight: normal; opacity: 0.6;">View and manage your tasks in a weekly format</span></div>
+                        </div>
+                        <div class="week-days">
+                            <div class="day-col"><div class="d-name">Sun</div><div class="d-num">22</div><div style="font-size: 0.7rem; margin-top: 10px; color: #94a3b8;">+<br>No tasks</div></div>
+                            <div class="day-col"><div class="d-name">Mon</div><div class="d-num">23</div><div style="font-size: 0.7rem; margin-top: 10px; color: #94a3b8;">+<br>No tasks</div></div>
+                            <div class="day-col active"><div class="d-name">Tue</div><div class="d-num">24</div><div style="font-size: 0.7rem; margin-top: 10px; color: rgba(255,255,255,0.8);">+<br>No tasks</div></div>
+                            <div class="day-col"><div class="d-name">Wed</div><div class="d-num">25</div><div style="font-size: 0.7rem; margin-top: 10px; color: #94a3b8;">+<br>No tasks</div></div>
+                            <div class="day-col"><div class="d-name">Thu</div><div class="d-num">26</div><div style="font-size: 0.7rem; margin-top: 10px; color: #94a3b8;">+<br>No tasks</div></div>
+                            <div class="day-col"><div class="d-name">Fri</div><div class="d-num">27</div><div style="font-size: 0.7rem; margin-top: 10px; color: #94a3b8;">+<br>No tasks</div></div>
+                            <div class="day-col"><div class="d-name">Sat</div><div class="d-num">28</div><div style="font-size: 0.7rem; margin-top: 10px; color: #94a3b8;">+<br>No tasks</div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Task Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h2>Add New Task</h2>
+                </div>
+                <form th:action="@{/api/tasks/form}" method="post">
+                    <div class="form-group">
+                        <label>Task Title *</label>
+                        <input type="text" name="title" required placeholder="Enter task title">
+                    </div>
+                    
+                    <div class="form-group mt-3">
+                        <label>Description</label>
+                        <textarea name="description" rows="3" placeholder="Enter task description"></textarea>
+                    </div>
+
+                    <div class="d-flex gap-3 mt-4 mb-4">
+                        <div class="form-group w-100" style="margin-bottom: 0;">
+                            <label>Date *</label>
+                            <input type="date" name="dueDate" required>
+                        </div>
+                        <div class="form-group w-100" style="margin-bottom: 0;">
+                            <label>Time *</label>
+                            <input type="time" name="dueTime" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-4 mb-4">
+                        <label>Priority *</label>
+                        <div class="priority-opts">
+                            <div class="p-opt">
+                                <input type="radio" id="p-low" name="priority" value="LOW">
+                                <label for="p-low" class="low"><i class="far fa-circle"></i> Low</label>
+                            </div>
+                            <div class="p-opt">
+                                <input type="radio" id="p-med" name="priority" value="MEDIUM" checked>
+                                <label for="p-med" class="medium"><i class="fas fa-dot-circle"></i> Medium</label>
+                            </div>
+                            <div class="p-opt">
+                                <input type="radio" id="p-high" name="priority" value="HIGH">
+                                <label for="p-high" class="high"><i class="far fa-circle"></i> High</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-success w-100 mt-3" style="padding: 16px; font-size: 1.1rem; border-radius: 12px;"><i class="fas fa-plus"></i> Add Task</button>
+                </form>
+            </div>
+            
+            <!-- Tasks List -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> Task List</h2>
+                </div>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Due</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="task : ${tasks}">
+                                <td>
+                                    <strong th:text="${task.title}" style="color: var(--primary-color);">Task Title</strong>
+                                    <br>
+                                    <small th:text="${task.description}" style="color: var(--text-secondary);">Description</small>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${task.priority.name() == 'HIGH'} ? 'badge-danger' : (${task.priority.name() == 'MEDIUM'} ? 'badge-info' : 'badge-success')"
+                                          th:text="${task.priority}">Priority</span>
+                                </td>
+                                <td>
+                                    <span class="badge" 
+                                          th:classappend="${task.status.name() == 'COMPLETED'} ? 'badge-success' : (${task.status.name() == 'IN_PROGRESS'} ? 'badge-warning' : 'badge-primary')"
+                                          th:text="${task.status}">Status</span>
+                                </td>
+                                <td>
+                                    <div th:text="${task.dueDate != null} ? ${#temporals.format(task.dueDate, 'dd MMM yyyy')} : '-'">Date</div>
+                                    <div style="font-size: 0.8rem; color: var(--text-secondary);" th:text="${task.dueTime != null} ? ${task.dueTime} : ''">Time</div>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                                        <!-- Mark as In Progress -->
+                                        <form th:if="${task.status.name() == 'PENDING'}" 
+                                              th:action="@{/api/tasks/form/{id}/status(id=${task.taskId})}" method="post" style="display:inline;">
+                                            <input type="hidden" name="status" value="IN_PROGRESS">
+                                            <button type="submit" class="btn btn-warning btn-icon-only" title="Start Task">
+                                                <i class="fas fa-play"></i>
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- Mark as Complete -->
+                                        <form th:if="${task.status.name() != 'COMPLETED'}" 
+                                              th:action="@{/api/tasks/form/{id}/status(id=${task.taskId})}" method="post" style="display:inline;">
+                                            <input type="hidden" name="status" value="COMPLETED">
+                                            <button type="submit" class="btn btn-success btn-icon-only" title="Complete Task">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                        
+                                        <!-- Delete -->
+                                        <form th:action="@{/api/tasks/form/{id}/delete(id=${task.taskId})}" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-danger btn-icon-only" onclick="return confirm('Delete this task?')" title="Delete Task">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr th:if="${tasks == null or tasks.empty}">
+                                <td colspan="5" class="text-center" style="padding: 40px; color: var(--text-secondary);">No tasks yet. Plan your schedule above!</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
