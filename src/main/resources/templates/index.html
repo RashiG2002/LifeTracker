@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Tracker - Track your life</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="landing-wrapper">
+        <header class="landing-header animate-fade-up">
+            <div class="landing-logo">
+                <div class="logo-badge">LT</div>
+                Life Tracker
+            </div>
+            <nav class="landing-nav">
+                <a th:href="@{/register}">Sign Up</a>
+                <a th:href="@{/login}">Login</a>
+            </nav>
+        </header>
+
+        <main class="landing-body animate-fade-up" style="animation-delay: 0.2s;">
+            <h1>Track your life.</h1>
+            <p>LifeTracker helps you track everything in your life from health & fitness to travel & chess with simple insights and graphs.</p>
+            <div class="landing-actions">
+                <a th:href="@{/register}" class="btn btn-primary" style="padding: 16px 36px; border-radius: 40px; font-size: 1.1rem;">Get started</a>
+            </div>
+        </main>
+    </div>
+</body>
+</html>

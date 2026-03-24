@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - LifeTracker</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-dashboard">
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><div class="logo-badge">LT</div> LifeTracker</h1>
+                <span th:text="'Welcome, ' + ${session.userName}" style="font-weight: 500; font-size: 0.9rem;">Welcome, User</span>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a th:href="@{/dashboard}" class="active"><i class="fas fa-home"></i> <span>Dashboard</span></a></li>
+                <li><a th:href="@{/transactions}"><i class="fas fa-exchange-alt"></i> <span>Transactions</span></a></li>
+                <li><a th:href="@{/budgets}"><i class="fas fa-wallet"></i> <span>Budgets</span></a></li>
+                <li><a th:href="@{/tasks}"><i class="fas fa-tasks"></i> <span>Tasks</span></a></li>
+                <li><a th:href="@{/health}"><i class="fas fa-heartbeat"></i> <span>Health</span></a></li>
+                <li><a th:href="@{/skills}"><i class="fas fa-graduation-cap"></i> <span>Skills</span></a></li>
+                <li><a th:href="@{/reports}"><i class="fas fa-chart-bar"></i> <span>Reports</span></a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> <span>Logout</span></a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="margin-bottom: 50px;">
+                <h1>Dashboard</h1>
+                <p>Overview of your life tracking activities</p>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr); gap: 30px;">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #4ade80; color: white;">
+                        <i class="fas fa-arrow-up"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Income</h3>
+                        <p th:text="'Rs. ' + ${#numbers.formatDecimal(totalIncome, 1, 2)}">Rs. 0.00</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #ff7675; color: white;">
+                        <i class="fas fa-arrow-down"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Expenses</h3>
+                        <p th:text="'Rs. ' + ${#numbers.formatDecimal(totalExpenses, 1, 2)}">Rs. 0.00</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #8c7ae6; color: white;">
+                        <i class="fas fa-balance-scale"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Current Balance</h3>
+                        <p th:text="'Rs. ' + ${#numbers.formatDecimal(balance, 1, 2)}">Rs. 0.00</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #1dd1a1; color: white;">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Pending Tasks</h3>
+                        <p th:text="${pendingTasks}">0</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #ff6b6b; color: white;">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Calories Burned</h3>
+                        <p th:text="${totalCaloriesBurned} + ' cal'">0 cal</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #5f27cd; color: white;">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Skills Tracking</h3>
+                        <p th:text="${totalSkills} + ' skills'">0 skills</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="card quick-actions-card" style="margin-top: 50px;">
+                <div class="card-header" style="border-bottom: none; margin-bottom: 5px;">
+                    <h2 style="font-size: 1.2rem; display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-bolt" style="color: var(--primary-color);"></i> Quick Actions
+                    </h2>
+                </div>
+                <div class="d-flex gap-3" style="flex-wrap: wrap; padding-top: 10px;">
+                    <a th:href="@{/transactions}" class="btn" style="background: #111; color: white; border-radius: 40px; padding: 12px 24px;">
+                        <i class="fas fa-plus"></i> Add Transaction
+                    </a>
+                    <a th:href="@{/tasks}" class="btn" style="background: transparent; color: #111; border: 1px solid #e2e8f0; border-radius: 40px; padding: 12px 24px;">
+                        <i class="fas fa-plus"></i> Add Task
+                    </a>
+                    <a th:href="@{/health}" class="btn" style="background: #00e676; color: white; border-radius: 40px; padding: 12px 24px; box-shadow: 0 4px 15px rgba(0, 230, 118, 0.3);">
+                        <i class="fas fa-plus"></i> Log Activity
+                    </a>
+                    <a th:href="@{/skills}" class="btn" style="background: #111; color: white; border-radius: 40px; padding: 12px 24px;">
+                        <i class="fas fa-plus"></i> Track Skill
+                    </a>
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>
