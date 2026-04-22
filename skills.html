@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skills - LifeTracker</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-skills">
+    <div class="app-wrapper">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><div class="logo-badge">LT</div> LifeTracker</h1>
+                <span th:text="#{welcome.user(${session.userName})}" style="font-weight: 500; font-size: 0.9rem; margin-top: 5px; display: block; color: var(--text-secondary);">Welcome, User</span>
+            </div>
+            
+            <ul class="sidebar-nav">
+                <li><a th:href="@{/dashboard}"><i class="fas fa-home"></i> <span th:text="#{nav.dashboard}">Dashboard</span></a></li>
+                <li><a th:href="@{/transactions}"><i class="fas fa-exchange-alt"></i> <span th:text="#{nav.transactions}">Transactions</span></a></li>
+                <li><a th:href="@{/budgets}"><i class="fas fa-wallet"></i> <span th:text="#{nav.budgets}">Budgets</span></a></li>
+                <li><a th:href="@{/tasks}"><i class="fas fa-tasks"></i> <span th:text="#{nav.tasks}">Tasks</span></a></li>
+                <li><a th:href="@{/health}"><i class="fas fa-heartbeat"></i> <span th:text="#{nav.health}">Health</span></a></li>
+                <li><a th:href="@{/skills}" class="active"><i class="fas fa-graduation-cap"></i> <span th:text="#{nav.skills}">Skills</span></a></li>
+                <li><a th:href="@{/reports}"><i class="fas fa-chart-bar"></i> <span th:text="#{nav.reports}">Reports</span></a></li>
+            </ul>
+
+            <div class="sidebar-footer">
+                <a th:href="@{/logout}"><i class="fas fa-sign-out-alt"></i> <span th:text="#{nav.logout}">Logout</span></a>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 40px; border-radius: 24px; box-shadow: var(--shadow); margin-bottom: 40px;">
+                <div>
+                    <h1 style="color: var(--primary-color); font-size: 2.5rem; font-weight: 800; margin-bottom: 5px;">Skill Development</h1>
+                    <p style="color: var(--text-secondary); font-size: 1.1rem; margin: 0;">Track your learning journey and skill progress</p>
+                </div>
+                <img th:src="@{/images/skills_deco_1773913870588.png}" alt="Decoration" style="height: 120px; filter: drop-shadow(0 15px 20px rgba(0,0,0,0.1)); border-radius: 16px; mix-blend-mode: multiply;">
+            </div>
+            
+            <!-- Flash Messages -->
+            <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            
+            <!-- Skill Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon balance">
+                        <i class="fas fa-book"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Total Skills</h3>
+                        <p th:text="${skills != null} ? ${#lists.size(skills)} : 0">0</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon income">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Skills Tracked</h3>
+                        <p th:text="${skills != null} ? ${#lists.size(skills)} + ' skills' : '0 skills'">0 skills</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon tasks">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="stat-info">
+                        <h3>Active Goals</h3>
+                        <p th:text="${activeGoals != null} ? ${activeGoals} : 0">0</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Skill Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-plus-circle"></i> Add New Skill</h2>
+                </div>
+                <form th:action="@{/api/skills/form}" method="post">
+                    <div class="d-flex gap-2" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+                        <div class="form-group">
+                            <label>Skill Name</label>
+                            <input type="text" name="skillName" required placeholder="e.g., Python, Critical Thinking, Leadership" list="skill-suggestions">
+                            <datalist id="skill-suggestions">
+                                <option value="Python">
+                                <option value="JavaScript">
+                                <option value="Java">
+                                <option value="Guitar">
+                                <option value="Drawing">
+                                <option value="Spanish">
+                                <option value="Painting">  
+                                <option value="Crafts">
+                                <option value="Woodworking">
+                                <option value="Leadership">
+                                <option value="Time Management">
+                                <option value="Speed Reading">
+                                <option value="Critical Thinking">
+                                <option value="Emotional Intelligence">
+                                <option value="Problem-Solving">
+                                <option value="Active Listening">
+                                <option value="Adaptability">
+                            </datalist>
+                        </div>
+                        <div class="form-group">
+                            <label>Current Level</label>
+                            <select name="level" required>
+                                <option value="BEGINNER">Beginner</option>
+                                <option value="INTERMEDIATE">Intermediate</option>
+                                <option value="ADVANCED">Advanced</option>
+                                <option value="EXPERT">Expert</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="margin: 0; min-width: 150px;">
+                            <label>Target Hours</label>
+                            <input type="number" name="targetHours" min="0.5" step="0.5" placeholder="e.g., 100" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; transition: border-color 0.3s;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-plus"></i> Add Skill</button>
+                </form>
+            </div>
+            
+            <!-- Skills List -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-list"></i> Your Skills</h2>
+                </div>
+                
+                <div th:if="${skills != null and !skills.empty}">
+                    <div th:each="skill : ${skills}" class="card" style="margin: 1rem 0; background: var(--card-bg);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; padding: 1rem; flex-wrap: wrap; gap: 1rem;">
+                            <div>
+                                <h3 th:text="${skill.skillName}" style="margin-bottom: 0.5rem;">Skill Name</h3>
+                                <span class="badge badge-warning" th:text="${skill.level}">Beginner</span>
+                                <span style="color: var(--text-secondary); margin-left: 1rem;" th:text="'Target: ' + ${skill.targetHours != null ? skill.targetHours : 0} + ' hrs'">Target: 0 hrs</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="color: var(--text-secondary); font-size: 0.875rem;">
+                                    <i class="fas fa-clock"></i>
+                                    <span th:text="${#numbers.formatDecimal(skill.totalHoursSpent, 1, 1)} + ' hours practiced'">0 hours practiced</span>
+                                </div>
+                                <!-- Progress Status -->
+                                <div th:if="${skill.targetHours != null and skill.targetHours > 0}" style="margin-top: 0.5rem;">
+                                    <div style="font-size: 0.75rem; margin-bottom: 0.25rem;">
+                                        <span th:if="${skill.totalHoursSpent >= skill.targetHours}" style="color: #28a745; font-weight: 600;">
+                                            <i class="fas fa-trophy"></i> Target Achieved! 
+                                        </span>
+                                        <span th:if="${skill.totalHoursSpent < skill.targetHours}" style="color: var(--text-secondary);">
+                                            <span th:text="${#numbers.formatDecimal((skill.totalHoursSpent / skill.targetHours) * 100, 0, 0)} + '% Complete'">0% Complete</span>
+                                        </span>
+                                    </div>
+                                    <!-- Progress Bar -->
+                                    <div style="width: 120px; height: 6px; background: #e9ecef; border-radius: 3px; overflow: hidden;">
+                                        <div th:if="${skill.totalHoursSpent >= skill.targetHours}" 
+                                             style="width: 100%; height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s;"></div>
+                                        <div th:if="${skill.totalHoursSpent < skill.targetHours}" 
+                                             th:style="'width: ' + ${#numbers.formatDecimal((skill.totalHoursSpent / skill.targetHours) * 100, 0, 0)} + '%; height: 100%; background: linear-gradient(90deg, #007bff, #6f42c1); transition: width 0.3s;'"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Log Practice Form -->
+                        <div style="padding: 0 1rem 1rem; border-top: 1px solid var(--border-color); margin-top: 0.5rem; padding-top: 1rem;">
+                            <form th:action="@{/api/skills/form/{id}/progress(id=${skill.skillId})}" method="post" style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
+                                <div class="form-group" style="margin: 0; flex: 1; min-width: 150px;">
+                                    <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">Date</label>
+                                    <input type="date" name="progressDate" required th:data-skill-id="${skill.skillId}" th:data-created-at="${skill.createdAt}" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; transition: border-color 0.3s;">
+                                </div>
+                                <div class="form-group" style="margin: 0; flex: 1; min-width: 150px;">
+                                    <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">Log Practice (hours)</label>
+                                    <input type="number" name="hoursSpent" step="0.5" min="0.5" required placeholder="Hours" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; transition: border-color 0.3s;">
+                                </div>
+                                <div class="form-group" style="margin: 0; flex: 2; min-width: 200px;">
+                                    <label style="font-weight: 600; color: var(--text-primary); margin-bottom: 0.5rem; display: block;">What did you practice?</label>
+                                    <input type="text" name="notes" placeholder="Brief description" th:id="'notes-' + ${skill.skillId}" th:data-skill-name="${skill.skillName}" style="width: 100%; padding: 0.75rem; border: 2px solid var(--border-color); border-radius: 8px; font-size: 0.95rem; transition: border-color 0.3s;">
+                                </div>
+                                <button type="submit" class="btn btn-success" style="padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; transition: transform 0.2s; margin-top: 1.75rem;"><i class="fas fa-plus"></i> Log</button>
+                            </form>
+                            <form th:action="@{/api/skills/form/{id}/delete(id=${skill.skillId})}" method="post" style="display:inline; margin-top: 0.5rem;">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Delete this skill?')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div th:if="${skills == null or skills.empty}" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <i class="fas fa-graduation-cap" style="font-size: 3rem; margin-bottom: 1rem;"></i>
+                    <p>No skills added yet. Start tracking your learning journey!</p>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        function getSkillSpecificSuggestions(skillName) {
+            const suggestions = {
+                'python': [
+                    'Python libraries and frameworks practice',
+                    'Debugging Python code',
+                    'Python algorithms and problem solving',
+                    'Object-oriented programming in Python',
+                    'Python file handling and I/O operations',
+                    'Python web development with Flask/Django',
+                    'Python data analysis with pandas',
+                    'Python API development with FastAPI',
+                    'Python machine learning basics',
+                    'Python database operations with SQLAlchemy'
+                ],
+                'javascript': [
+                    'JavaScript functions and closures practice',
+                    'DOM manipulation and event handling',
+                    'JavaScript async programming with Promises',
+                    'ES6+ features and modern syntax',
+                    'JavaScript design patterns',
+                    'React.js component development',
+                    'Node.js backend development',
+                    'JavaScript testing with Jest',
+                    'API integration with JavaScript',
+                    'JavaScript performance optimization'
+                ],
+                'java': [
+                    'Java object-oriented programming practice',
+                    'Java collections framework',
+                    'Java exception handling',
+                    'Java multithreading and concurrency',
+                    'Java Spring Boot development',
+                    'Java unit testing with JUnit',
+                    'Java database connectivity (JDBC)',
+                    'Java design patterns',
+                    'Java 8+ features practice',
+                    'Java microservices with Spring Cloud'
+                ],
+                'guitar': [
+                    'Chord practice and transitions',
+                    'Learning new songs and tabs',
+                    'Scale practice and exercises',
+                    'Fingerpicking techniques',
+                    'Strumming patterns and rhythm',
+                    'Music theory application',
+                    'Improvisation and soloing',
+                    'Ear training exercises',
+                    'Guitar maintenance and setup',
+                    'Playing with metronome'
+                ],
+                'drawing': [
+                    'Basic shapes and forms practice',
+                    'Shading and texture techniques',
+                    'Perspective drawing exercises',
+                    'Figure drawing and anatomy',
+                    'Landscape sketching',
+                    'Portrait drawing practice',
+                    'Gesture drawing exercises',
+                    'Still life composition',
+                    'Ink drawing techniques',
+                    'Digital drawing with tablet'
+                ],
+                'spanish': [
+                    'Spanish vocabulary building',
+                    'Grammar exercises and conjugation',
+                    'Spanish conversation practice',
+                    'Reading Spanish articles',
+                    'Spanish listening comprehension',
+                    'Writing exercises and essays',
+                    'Spanish culture and customs study',
+                    'Business Spanish terminology',
+                    'Travel Spanish phrases',
+                    'Spanish pronunciation drills'
+                ],
+                'painting': [
+                    'Color mixing and theory',
+                    'Brush techniques and control',
+                    'Canvas preparation and priming',
+                    'Still life composition',
+                    'Landscape painting practice',
+                    'Portrait painting techniques',
+                    'Abstract painting experiments',
+                    'Watercolor techniques',
+                    'Oil painting methods',
+                    'Painting texture and layering'
+                ],
+                'crafts': [
+                    'Paper crafting techniques',
+                    'DIY home decor projects',
+                    'Knitting and crochet basics',
+                    'Jewelry making',
+                    'Scrapbooking and card making',
+                    'Upcycling projects',
+                    'Seasonal craft decorations',
+                    'Fabric dyeing techniques',
+                    'Clay modeling and pottery',
+                    'Craft business and marketing'
+                ],
+                'woodworking': [
+                    'Basic woodworking tools safety',
+                    'Measuring and marking techniques',
+                    'Cutting and joinery methods',
+                    'Sanding and finishing',
+                    'Simple furniture projects',
+                    'Wood carving basics',
+                    'Wood staining and painting',
+                    'Workshop organization',
+                    'Advanced joinery techniques',
+                    'Woodworking business planning'
+                ],
+                'leadership': [
+                    'Team management exercises',
+                    'Decision making scenarios',
+                    'Communication skills practice',
+                    'Conflict resolution techniques',
+                    'Strategic planning processes',
+                    'Motivation and inspiration methods',
+                    'Delegation and empowerment',
+                    'Public speaking for leaders',
+                    'Time management for managers',
+                    'Leadership style development'
+                ],
+                'time management': [
+                    'Prioritization techniques and methods',
+                    'Calendar planning and scheduling',
+                    'Goal setting and tracking',
+                    'Distraction elimination strategies',
+                    'Energy management and focus',
+                    'Batch processing and efficiency',
+                    'Deadline management and planning',
+                    'Time tracking and analysis',
+                    'Productivity system setup',
+                    'Work-life balance techniques'
+                ],
+                'speed reading': [
+                    'Eye movement and fixation reduction',
+                    'Comprehension techniques',
+                    'Skimming and scanning methods',
+                    'Vocabulary expansion strategies',
+                    'Concentration and focus exercises',
+                    'Reading speed measurement and tracking',
+                    'Subvocalization reduction',
+                    'Peripheral vision training',
+                    'Reading posture optimization',
+                    'Digital reading efficiency'
+                ],
+                'critical thinking': [
+                    'Logical reasoning exercises',
+                    'Identifying biases and assumptions',
+                    'Problem decomposition and analysis',
+                    'Evidence evaluation and sourcing',
+                    'Creative thinking and brainstorming',
+                    'Decision making frameworks',
+                    'Logical fallacy recognition',
+                    'Critical reading and analysis',
+                    'Argument construction',
+                    'Socratic questioning techniques'
+                ],
+                'emotional intelligence': [
+                    'Self-awareness and reflection',
+                    'Emotion recognition in others',
+                    'Empathy development exercises',
+                    'Stress management techniques',
+                    'Active listening practice',
+                    'Conflict resolution with empathy',
+                    'Building rapport and trust',
+                    'Emotional regulation methods',
+                    'Social awareness training',
+                    'Relationship management skills'
+                ],
+                'problem-solving': [
+                    'Problem identification and definition',
+                    'Root cause analysis techniques',
+                    'Brainstorming and idea generation',
+                    'Solution evaluation and selection',
+                    'Implementation planning and execution',
+                    'Creative problem solving methods',
+                    'Analytical thinking exercises',
+                    'Decision matrix creation',
+                    'Risk assessment and mitigation',
+                    'Problem solving in teams'
+                ],
+                'active listening': [
+                    'Paraphrasing and confirmation',
+                    'Question asking and clarification',
+                    'Empathetic response techniques',
+                    'Distraction elimination methods',
+                    'Memory and retention practice',
+                    'Feedback and response skills',
+                    'Cultural awareness in listening',
+                    'Non-verbal cue recognition',
+                    'Listening in difficult conversations',
+                    'Note-taking while listening'
+                ],
+                'adaptability': [
+                    'Change management and acceptance',
+                    'Flexible thinking and mindset',
+                    'Learning new skills quickly',
+                    'Stress resilience and coping',
+                    'Uncertainty tolerance building',
+                    'Creative adaptation exercises',
+                    'Technology adaptation training',
+                    'Cross-cultural adaptability',
+                    'Career transition planning',
+                    'Personal flexibility assessment'
+                ]
+            };
+            
+            // Return skill-specific suggestions or common suggestions for any skill
+            const skillSuggestions = suggestions[skillName.toLowerCase()];
+            if (skillSuggestions && skillSuggestions.length > 0) {
+                return skillSuggestions;
+            }
+            
+            // Common suggestions for any skill
+            return [
+                'Basic practice and fundamentals',
+                'Review and reinforcement exercises',
+                'Advanced techniques and methods',
+                'Real-world application practice',
+                'Theory and concept study',
+                'Performance and demonstration',
+                'Problem-solving exercises',
+                'Creative exploration and experimentation',
+                'Peer feedback and collaboration',
+                'Self-assessment and improvement'
+            ];
+        }
+        
+        function setupSkillSpecificSuggestions() {
+            const practiceInputs = document.querySelectorAll('input[data-skill-name]');
+            
+            practiceInputs.forEach(input => {
+                const skillName = input.getAttribute('data-skill-name');
+                if (!skillName) return;
+                
+                // Create datalist for this skill
+                const datalistId = 'practice-suggestions-' + input.id;
+                let datalist = document.getElementById(datalistId);
+                
+                if (!datalist) {
+                    datalist = document.createElement('datalist');
+                    datalist.id = datalistId;
+                    input.parentNode.appendChild(datalist);
+                    input.setAttribute('list', datalistId);
+                }
+                
+                // Clear existing options
+                datalist.innerHTML = '';
+                
+                // Add skill-specific suggestions
+                const suggestions = getSkillSpecificSuggestions(skillName);
+                suggestions.forEach(suggestion => {
+                    const option = document.createElement('option');
+                    option.value = suggestion;
+                    datalist.appendChild(option);
+                });
+            });
+        }
+        
+        function setMinDateForAllSkills() {
+            const dateInputs = document.querySelectorAll('input[name="progressDate"]');
+            dateInputs.forEach(input => {
+                const createdAt = input.getAttribute('data-created-at');
+                if (createdAt) {
+                    // Convert LocalDateTime to YYYY-MM-DD format for date input min attribute
+                    const createdDate = new Date(createdAt);
+                    const minDate = createdDate.toISOString().split('T')[0];
+                    input.min = minDate;
+                    
+                    // Set default to today
+                    const today = new Date().toISOString().split('T')[0];
+                    input.value = today;
+                }
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            setupSkillSpecificSuggestions();
+            setMinDateForAllSkills();
+        });
+    </script>
+</body>
+</html>
+
+
