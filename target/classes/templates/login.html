@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:lang="${#locale.language}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - LifeTracker</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-wrapper">
+        <div class="auth-card animate-fade-up">
+            <div class="auth-header">
+                <h1><div class="logo-badge">LT</div> LifeTracker</h1>
+                <p th:text="#{login.subtitle}">Welcome back! Please login to your account</p>
+            </div>
+            
+            <div th:if="${error}" class="alert alert-danger animate-fade-up" style="animation-delay: 0.1s;">
+                <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+            </div>
+            
+            <div th:if="${success}" class="alert alert-success animate-fade-up" style="animation-delay: 0.1s;">
+                <i class="fas fa-check-circle"></i> <span th:text="${success}"></span>
+            </div>
+            
+            <form th:action="@{/login}" method="post" class="animate-fade-up" style="animation-delay: 0.2s;">
+                <div class="form-group">
+                          <label for="email" th:text="#{auth.email}">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control" 
+                              th:placeholder="#{auth.email.placeholder}" placeholder="Enter your email" required>
+                </div>
+                
+                <div class="form-group">
+                          <label for="password" th:text="#{auth.password}">Password</label>
+                    <input type="password" id="password" name="password" class="form-control" 
+                              th:placeholder="#{auth.password.placeholder}" placeholder="Enter your password" required>
+                </div>
+                
+                <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 14px; padding: 16px;">
+                          <i class="fas fa-sign-in-alt"></i> <span th:text="#{auth.login}">Login</span>
+                </button>
+            </form>
+            
+            <hr style="margin: 30px 0; border: none; border-top: 1px solid var(--border-color); opacity: 0.5;">
+            
+            <a th:href="@{/generate-demo}" class="btn btn-secondary animate-fade-up" style="width: 100%; display: flex; text-align: center; border-radius: 14px; padding: 14px; animation-delay: 0.3s; justify-content: center;">
+                <i class="fas fa-magic"></i> <span th:text="#{login.demo}">Generate Demo User</span>
+            </a>
+            
+            <div class="auth-footer mt-4 animate-fade-up" style="text-align: center; color: var(--text-secondary); animation-delay: 0.4s;">
+                <span th:text="#{login.noAccount}">Don't have an account?</span> <a th:href="@{/register}" style="font-weight: 600;" th:text="#{auth.register}">Register</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+

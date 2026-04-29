@@ -1,0 +1,8 @@
+com\lifetracker\service\TaskServiceTest.class
+com\lifetracker\controller\TaskControllerTest.class
+com\lifetracker\service\HealthServiceTest.class
+com\lifetracker\service\TransactionServiceTest.class
+com\lifetracker\service\UserServiceTest.class
+com\lifetracker\service\SkillServiceTest.class
+com\lifetracker\service\RecommendationServiceTest.class
+com\lifetracker\system\SystemIntegrationTest.class
